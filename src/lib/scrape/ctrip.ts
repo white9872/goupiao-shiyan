@@ -59,16 +59,18 @@ export async function scrapeCtripFlight(task: Task): Promise<ScrapeResult | null
     await departInput.click({ timeout: 10_000 })
     await departInput.fill(task.ctripFlight.departDate)
 
-    if (task.ctripFlight.tripType === 'round' && task.ctripFlight.returnDate) {
-      // return input doesn't have stable placeholder on the page; pick the 2nd date input
-      const allDateInputs = page.locator('input').filter({ hasText: /\d{4}-\d{2}-\d{2}/ }).first()
-      // fallback: try fill via JS on focused element
+    if (task.ctripFlight.tripType === 'round') {
+      const stay = typeof task.ctripFlight.stayDays === 'number' ? task.ctripFlight.stayDays : 3
+      const returnDate =
+        task.ctripFlight.returnDate ??
+        new Date(new Date(task.ctripFlight.departDate).getTime() + stay * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
+      // return input doesn't have stable placeholder on the page; try common candidates
       const returnCandidate = page.locator('input[placeholder=""]').first()
       await returnCandidate.click().catch(() => {})
-      await returnCandidate.fill(task.ctripFlight.returnDate).catch(async () => {
-        await page.keyboard.type(task.ctripFlight.returnDate, { delay: 20 })
+      await returnCandidate.fill(returnDate).catch(async () => {
+        await page.keyboard.type(returnDate, { delay: 20 })
       })
-      void allDateInputs
     }
 
     // search

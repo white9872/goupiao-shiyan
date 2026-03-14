@@ -13,10 +13,7 @@ export default function CreateTaskForm() {
   const [to, setTo] = useState('北京(BJS)')
   const [tripType, setTripType] = useState<TripType>('round')
   const [departDate, setDepartDate] = useState(() => new Date().toISOString().slice(0, 10))
-  const [returnDate, setReturnDate] = useState(() => {
-    const d = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
-    return d.toISOString().slice(0, 10)
-  })
+  const [stayDays, setStayDays] = useState('3')
   const [notifyBelowPrice, setNotifyBelowPrice] = useState('')
   const [enabled, setEnabled] = useState(true)
 
@@ -40,7 +37,11 @@ export default function CreateTaskForm() {
           from,
           to,
           departDate,
-          ...(tripType === 'round' ? { returnDate } : {}),
+          ...(tripType === 'round'
+            ? {
+                stayDays: stayDays.trim() ? Number(stayDays.trim()) : 3,
+              }
+            : {}),
         },
       }
       if (notifyBelowPrice.trim()) body.notifyBelowPrice = Number(notifyBelowPrice.trim())
@@ -113,8 +114,14 @@ export default function CreateTaskForm() {
 
         {tripType === 'round' ? (
           <label className="text-sm">
-            <div className="text-gray-700">返程日期</div>
-            <input className="mt-1 w-full rounded border px-3 py-2" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} placeholder="yyyy-mm-dd" />
+            <div className="text-gray-700">停留天数（不填默认 3 天）</div>
+            <input
+              className="mt-1 w-full rounded border px-3 py-2"
+              value={stayDays}
+              onChange={(e) => setStayDays(e.target.value)}
+              placeholder="3"
+              inputMode="numeric"
+            />
           </label>
         ) : null}
       </div>

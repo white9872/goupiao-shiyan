@@ -9,9 +9,10 @@ const CtripFlightSchema = z
     to: z.string().min(1),
     departDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     returnDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    stayDays: z.number().int().min(1).max(60).optional(),
   })
-  .refine((v) => v.tripType === 'oneway' || !!v.returnDate, {
-    message: 'returnDate required when tripType=round',
+  .refine((v) => v.tripType === 'oneway' || !!v.returnDate || typeof v.stayDays === 'number', {
+    message: 'returnDate or stayDays required when tripType=round',
     path: ['returnDate'],
   })
 

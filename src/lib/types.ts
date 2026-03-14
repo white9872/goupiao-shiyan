@@ -5,7 +5,11 @@ export type CtripFlightQuery = {
   from: string // city/airport text, e.g. 上海(SHA)
   to: string // e.g. 北京(BJS)
   departDate: string // yyyy-mm-dd
-  returnDate?: string // yyyy-mm-dd (round trip)
+  /**
+   * For round trip: either provide returnDate directly, or provide stayDays (nights).
+   */
+  returnDate?: string // yyyy-mm-dd
+  stayDays?: number // default 3 when omitted
 }
 
 export type Task = {
