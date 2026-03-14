@@ -1,0 +1,6 @@
+{
+  "identifier": "default",
+  "windows": ["main"],
+  "permissions": ["core:default"],
+  "platforms": ["macOS", "windows", "linux"]
+}
