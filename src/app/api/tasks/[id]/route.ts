@@ -42,11 +42,15 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
-  const patch: Partial<{ notifyBelowPrice?: number }> & typeof parsed.data = { ...parsed.data }
-  // allow clearing notifyBelowPrice
-  if (patch.notifyBelowPrice === null) patch.notifyBelowPrice = undefined
-  // allow clearing ctripFlight
-  if ('ctripFlight' in patch && patch.ctripFlight === null) patch.ctripFlight = undefined
+  const data = parsed.data
+  const { notifyBelowPrice, ctripFlight, ...rest } = data
+
+  // Normalize nullables (null -> undefined) to match our Task type
+  const patch = {
+    ...rest,
+    ...(notifyBelowPrice == null ? {} : { notifyBelowPrice }),
+    ...(ctripFlight == null ? {} : { ctripFlight }),
+  }
 
   const task = await db.updateTask(id, patch)
   if (!task) return NextResponse.json({ error: 'not_found' }, { status: 404 })
