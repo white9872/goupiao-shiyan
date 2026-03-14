@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import CreateTaskForm from '@/app/components/CreateTaskForm'
 
 export default async function Home() {
   const res = await fetch('http://localhost:3000/api/tasks', { cache: 'no-store' }).catch(() => null)
@@ -15,18 +16,9 @@ export default async function Home() {
       </header>
 
       <section className="rounded-lg border bg-white p-4 space-y-3">
-        <h2 className="font-medium">创建监控任务</h2>
-        {/* client form */}
-        <div className="text-sm text-gray-600">
-          先用 API 创建：POST /api/tasks（UI 表单下一步补上）。
-        </div>
-        <pre className="text-xs bg-gray-50 p-3 rounded overflow-auto">{`curl -X POST http://localhost:3000/api/tasks \\
-  -H 'content-type: application/json' \\
-  -d '{
-    "platform":"12306",
-    "name":"北京→上海 早班",
-    "targetUrl":"https://www.12306.cn/"
-  }'`}</pre>
+        <h2 className="font-medium">创建监控任务（携程机票）</h2>
+        <div className="text-sm text-gray-600">默认：1 成人、经济舱、直飞+中转都算、每 30 分钟抓取一次、保留 7 天。</div>
+        <CreateTaskForm />
       </section>
 
       <section className="rounded-lg border bg-white p-4 space-y-3">
