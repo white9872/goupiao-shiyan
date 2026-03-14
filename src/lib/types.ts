@@ -1,14 +1,29 @@
 export type Platform = 'damai' | 'ctrip' | '12306'
 
+export type CtripFlightQuery = {
+  tripType: 'oneway' | 'round'
+  from: string // city/airport text, e.g. 上海(SHA)
+  to: string // e.g. 北京(BJS)
+  departDate: string // yyyy-mm-dd
+  returnDate?: string // yyyy-mm-dd (round trip)
+}
+
 export type Task = {
   id: string
   platform: Platform
   name: string
+  /**
+   * Target URL to open for manual booking.
+   * For ctrip flights, this can be the domestic channel entry, or a booking/results URL.
+   */
   targetUrl: string
+  /** Platform-specific query config (MVP: ctrip flight search) */
+  ctripFlight?: CtripFlightQuery
+
   enabled: boolean
   checkEveryMinutes: number // MVP 固定 30
   notifyBelowPrice?: number
-  newLowWindowDays: number // MVP 固定 7
+  newLowWindowDays: number // 默认 7（也用于数据保留天数）
   createdAt: string
   updatedAt: string
 }

@@ -2,10 +2,24 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 
+const CtripFlightSchema = z
+  .object({
+    tripType: z.enum(['oneway', 'round']).default('oneway'),
+    from: z.string().min(1),
+    to: z.string().min(1),
+    departDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    returnDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  })
+  .refine((v) => v.tripType === 'oneway' || !!v.returnDate, {
+    message: 'returnDate required when tripType=round',
+    path: ['returnDate'],
+  })
+
 const PatchSchema = z.object({
   platform: z.enum(['damai', 'ctrip', '12306']).optional(),
   name: z.string().min(1).optional(),
   targetUrl: z.string().url().optional(),
+  ctripFlight: CtripFlightSchema.optional().nullable(),
   enabled: z.boolean().optional(),
   checkEveryMinutes: z.number().int().min(5).max(24 * 60).optional(),
   notifyBelowPrice: z.number().optional().nullable(),
@@ -30,6 +44,8 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const patch: Partial<{ notifyBelowPrice?: number }> & typeof parsed.data = { ...parsed.data }
   // allow clearing notifyBelowPrice
   if (patch.notifyBelowPrice === null) patch.notifyBelowPrice = undefined
+  // allow clearing ctripFlight
+  if ('ctripFlight' in patch && patch.ctripFlight === null) patch.ctripFlight = undefined
 
   const task = await db.updateTask(id, patch)
   if (!task) return NextResponse.json({ error: 'not_found' }, { status: 404 })
