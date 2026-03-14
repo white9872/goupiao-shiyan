@@ -41,7 +41,8 @@ npm run worker
 - ✅ 任务 CRUD API：`/api/tasks`
 - ✅ 本地存储：`data/db.json`
 - ✅ worker 框架：定时任务 + 通知框架
-- ⏳ 各平台真实抓取：待实现（Playwright）
+- 🧪 携程机票抓取：Playwright 初版（可能受页面改版/风控影响，需要迭代）
+- ⏳ 其它平台抓取：待实现（Playwright）
 - ⏳ “近期新低”判断：待实现（目前仅有低于阈值提醒）
 - ⏳ UI 表单：待实现（目前用 curl 示例创建任务）
 
