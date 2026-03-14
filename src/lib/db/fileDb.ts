@@ -108,6 +108,22 @@ export const fileDb = {
       .slice(0, limit)
   },
 
+  async deleteSnapshotsForTask(taskId: string): Promise<number> {
+    const db = await readDb()
+    const before = db.snapshots.length
+    db.snapshots = db.snapshots.filter((s) => s.taskId !== taskId)
+    await writeDb(db)
+    return before - db.snapshots.length
+  },
+
+  async deleteSnapshotsOlderThan(taskId: string, cutoffIso: string): Promise<number> {
+    const db = await readDb()
+    const before = db.snapshots.length
+    db.snapshots = db.snapshots.filter((s) => !(s.taskId === taskId && s.capturedAt < cutoffIso))
+    await writeDb(db)
+    return before - db.snapshots.length
+  },
+
   async addNotification(n: Omit<NotificationLog, 'id' | 'sentAt'> & { sentAt?: string }): Promise<NotificationLog> {
     const db = await readDb()
     const log: NotificationLog = {

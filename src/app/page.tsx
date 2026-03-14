@@ -2,8 +2,8 @@ import Link from 'next/link'
 
 export default async function Home() {
   const res = await fetch('http://localhost:3000/api/tasks', { cache: 'no-store' }).catch(() => null)
-  const data = res && res.ok ? await res.json() : { tasks: [] }
-  const tasks = (data.tasks ?? []) as Array<any>
+  const data = res && res.ok ? ((await res.json()) as { tasks: unknown[] }) : { tasks: [] as unknown[] }
+  const tasks = data.tasks ?? []
 
   return (
     <main className="mx-auto max-w-5xl p-6 space-y-6">
@@ -38,18 +38,28 @@ export default async function Home() {
           <div className="text-sm text-gray-600">暂无任务</div>
         ) : (
           <ul className="divide-y">
-            {tasks.map((t) => (
-              <li key={t.id} className="py-3 flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="font-medium">{t.name}</div>
-                  <div className="text-xs text-gray-600">
-                    平台：{t.platform} · 间隔：{t.checkEveryMinutes} 分钟 · {t.enabled ? '启用' : '停用'}
+            {tasks.map((t) => {
+              const task = t as {
+                id: string
+                name: string
+                platform: string
+                checkEveryMinutes: number
+                enabled: boolean
+                targetUrl: string
+              }
+              return (
+                <li key={task.id} className="py-3 flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="font-medium">{task.name}</div>
+                    <div className="text-xs text-gray-600">
+                      平台：{task.platform} · 间隔：{task.checkEveryMinutes} 分钟 · {task.enabled ? '启用' : '停用'}
+                    </div>
+                    <div className="text-xs text-gray-500 break-all">{task.targetUrl}</div>
                   </div>
-                  <div className="text-xs text-gray-500 break-all">{t.targetUrl}</div>
-                </div>
-                <Link className="text-sm underline" href={`/tasks/${t.id}`}>详情</Link>
-              </li>
-            ))}
+                  <Link className="text-sm underline" href={`/tasks/${task.id}`}>详情</Link>
+                </li>
+              )
+            })}
           </ul>
         )}
       </section>

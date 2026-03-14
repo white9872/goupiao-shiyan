@@ -5,6 +5,15 @@ import { sendFeishuText } from '@/lib/feishu'
 
 async function runOnce() {
   const tasks = await db.listTasks()
+
+  // retention: keep last 7 days snapshots by default (per-task config exists: newLowWindowDays)
+  for (const t of tasks) {
+    const keepDays = Math.max(1, t.newLowWindowDays || 7)
+    const cutoff = new Date(Date.now() - keepDays * 24 * 60 * 60 * 1000).toISOString()
+    const deleted = await db.deleteSnapshotsOlderThan(t.id, cutoff)
+    if (deleted > 0) console.log(`[worker] retention pruned ${deleted} snapshots for ${t.name}`)
+  }
+
   const enabled = tasks.filter((t) => t.enabled)
   for (const t of enabled) {
     try {
@@ -29,8 +38,8 @@ async function runOnce() {
           success: true,
         })
       }
-    } catch (e: any) {
-      const msg = e?.message ?? String(e)
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
       await db.addNotification({
         taskId: t.id,
         kind: 'error',

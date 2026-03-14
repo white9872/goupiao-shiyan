@@ -27,7 +27,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
-  const patch: any = { ...parsed.data }
+  const patch: Partial<{ notifyBelowPrice?: number }> & typeof parsed.data = { ...parsed.data }
   // allow clearing notifyBelowPrice
   if (patch.notifyBelowPrice === null) patch.notifyBelowPrice = undefined
 

@@ -36,23 +36,32 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
           <div className="text-sm text-gray-600">暂无快照（还没跑抓取，或抓取未接入）。</div>
         ) : (
           <ul className="divide-y">
-            {snapshots.map((s: any) => (
-              <li key={s.id} className="py-2 text-sm flex items-center justify-between">
-                <span>{new Date(s.capturedAt).toLocaleString()}</span>
-                <span className="font-medium">
-                  {s.price} {s.currency}
-                </span>
-              </li>
-            ))}
+            {snapshots.map((s: unknown) => {
+              const snap = s as { id: string; capturedAt: string; price: number; currency: string }
+              return (
+                <li key={snap.id} className="py-2 text-sm flex items-center justify-between">
+                  <span>{new Date(snap.capturedAt).toLocaleString()}</span>
+                  <span className="font-medium">
+                    {snap.price} {snap.currency}
+                  </span>
+                </li>
+              )
+            })}
           </ul>
         )}
       </section>
 
       <section className="rounded-lg border bg-white p-4 space-y-2">
+        <h2 className="font-medium">数据清理</h2>
+        <p className="text-sm text-gray-700">默认保留 {task.newLowWindowDays} 天快照（worker 自动清理）。也可以手动清空：</p>
+        <pre className="text-xs bg-gray-50 p-3 rounded overflow-auto">{`# 删除该任务所有快照\ncurl -X DELETE http://localhost:3000/api/tasks/${task.id}/snapshots\n\n# 仅删除早于 7 天的快照\ncurl -X DELETE "http://localhost:3000/api/tasks/${task.id}/snapshots?mode=older_than_days&days=7"`}</pre>
+      </section>
+
+      <section className="rounded-lg border bg-white p-4 space-y-2">
         <h2 className="font-medium">下一步</h2>
         <ol className="list-decimal pl-5 text-sm text-gray-700 space-y-1">
-          <li>接入抓取：Playwright 抓取各平台价格（先做 12306 或 携程，选一个最容易）。</li>
-          <li>接入飞书推送：使用飞书机器人 Webhook。</li>
+          <li>接入抓取：先做携程机票（需要你给一个具体的“航班搜索结果页”链接）。</li>
+          <li>接入飞书推送：配置 FEISHU_WEBHOOK_URL。</li>
           <li>加 UI 表单：在页面直接创建/编辑任务（不再用 curl）。</li>
         </ol>
       </section>
