@@ -1,5 +1,8 @@
 name: Tauri Release (macOS + Windows)
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
