@@ -27,10 +27,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: ticket-watcher/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install frontend deps
-        working-directory: ticket-watcher
         run: npm ci
 
       - name: Build & bundle (Tauri)
@@ -38,7 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          projectPath: ticket-watcher
+          projectPath: .
           tagName: ${{ github.ref_name }}
           releaseName: '购票试验 ${{ github.ref_name }}'
           releaseBody: 'Automated build for macOS + Windows.'
