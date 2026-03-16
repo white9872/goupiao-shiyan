@@ -1,10 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-
-type Platform = 'ctrip'
-
-type TripType = 'oneway' | 'round'
+import { addTask, type Platform, type Task, type TripType } from '@/app/lib/tasksStore'
 
 export default function CreateTaskForm() {
   const [platform] = useState<Platform>('ctrip')
@@ -25,13 +22,15 @@ export default function CreateTaskForm() {
     setSubmitting(true)
     setMsg(null)
     try {
-      const body: Record<string, unknown> = {
+      const task: Task = {
+        id: crypto.randomUUID(),
         platform,
         name,
         targetUrl: 'https://flights.ctrip.com/online/channel/domestic',
         enabled,
         checkEveryMinutes: 30,
         newLowWindowDays: 7,
+        createdAt: new Date().toISOString(),
         ctripFlight: {
           tripType,
           from,
@@ -43,20 +42,11 @@ export default function CreateTaskForm() {
               }
             : {}),
         },
+        ...(notifyBelowPrice.trim() ? { notifyBelowPrice: Number(notifyBelowPrice.trim()) } : {}),
       }
-      if (notifyBelowPrice.trim()) body.notifyBelowPrice = Number(notifyBelowPrice.trim())
 
-      const res = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setMsg(`创建失败：${JSON.stringify(data)}`)
-        return
-      }
-      setMsg('创建成功（刷新页面可看到任务）')
+      addTask(task)
+      setMsg('创建成功（已保存到本机 localStorage）')
     } catch (err) {
       setMsg(`创建失败：${String(err)}`)
     } finally {
